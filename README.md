@@ -1,53 +1,49 @@
-# GitHub Pages Template
+# Dry/Wet Mixer
 
-A modern, responsive website template for GitHub Pages with automatic deployment using GitHub Actions.
+A web-based audio mixer that allows you to blend between dry and wet audio signals in real-time.
 
 ## Features
 
-- Clean, modern design
-- Fully responsive layout
-- Automatic deployment to GitHub Pages
-- Easy to customize
-- Built with HTML and CSS
-- No JavaScript required
+- Real-time audio mixing between dry and wet signals
+- Simple and intuitive user interface
+- Web Audio API integration
+- Responsive design
+- No external dependencies
 
 ## Getting Started
 
 1. Clone this repository
-2. Customize the content in `index.html`
-3. Modify the styles in `styles.css` to match your preferences
-4. Push your changes to the main branch
-5. GitHub Actions will automatically deploy your site
+2. Add your audio files:
+   - Place your dry audio file as `dry.mp3`
+   - Place your wet audio file as `wet.mp3`
+3. Open `index.html` in a modern web browser
+4. Click the Play button to start
+5. Use the slider to adjust the dry/wet mix ratio
 
-## Customization
+## Usage
 
-### Changing Colors
+The mixer provides a simple interface with:
+- A Play/Stop button to control audio playback
+- A slider to adjust the dry/wet mix ratio (0.0 to 1.0)
+  - 0.0 = 100% wet signal
+  - 1.0 = 100% dry signal
 
-The color scheme can be easily modified by editing the CSS variables in `styles.css`:
+## Technical Details
 
-```css
-:root {
-    --primary-color: #2563eb;
-    --text-color: #1f2937;
-    --background-color: #ffffff;
-    --secondary-background: #f3f4f6;
-}
-```
+The application uses the Web Audio API to:
+- Load and decode audio files
+- Create separate gain nodes for dry and wet signals
+- Mix the signals in real-time
+- Handle audio playback and stopping
 
-### Adding Content
+## Browser Support
 
-Edit the sections in `index.html` to add your own content. The template includes:
-
-- Navigation menu
-- Hero section
-- About section
-- Contact section
-- Footer
-
-## Deployment
-
-The site is automatically deployed to GitHub Pages when you push to the main branch. The deployment is handled by the GitHub Actions workflow in `.github/workflows/deploy.yml`.
+This application works in modern browsers that support the Web Audio API, including:
+- Chrome
+- Firefox
+- Safari
+- Edge
 
 ## License
 
-This template is open source and available under the MIT License.
+This project is open source and available under the MIT License.

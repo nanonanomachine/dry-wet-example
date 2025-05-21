@@ -109,9 +109,9 @@
                 drySource.connect(this.dryGainNode);
                 wetSource.connect(this.wetGainNode);
 
-                drySource.start(this.startTime);
-                wetSource.start(this.startTime);
-
+                const scheduleAheadTime = 0.1; // 100ms
+                drySource.start(this.startTime + scheduleAheadTime);
+                wetSource.start(this.startTime + scheduleAheadTime);
                 drySource.onended = () => {
                     this.isPlaying = false;
                     document.getElementById('playButton').textContent = 'Play';

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dry/Wet Mixer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Dry/Wet Mixer</h1>
+
+        <div class="controls">
+            <button id="playButton">Play</button>
+            <div class="slider-container">
+                <label for="mixSlider">Dry/Wet Mix</label>
+                <input type="range" id="mixSlider" min="0" max="1" step="0.01" value="1">
+                <span id="mixValue">1.0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AudioMixer {
+            constructor() {
+                this.audioContext = null;
+                this.dryBuffer = null;
+                this.wetBuffer = null;
+                this.dryGainNode = null;
+                this.wetGainNode = null;
+                this.isPlaying = false;
+                this.startTime = 0;
+
+                this.initializeAudio();
+                this.setupEventListeners();
+            }
+
+            async initializeAudio() {
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                // Load audio files
+                const [dryResponse, wetResponse] = await Promise.all([
+                    fetch('dry.mp3'),
+                    fetch('wet.mp3')
+                ]);
+
+                const [dryArrayBuffer, wetArrayBuffer] = await Promise.all([
+                    dryResponse.arrayBuffer(),
+                    wetResponse.arrayBuffer()
+                ]);
+
+                this.dryBuffer = await this.audioContext.decodeAudioData(dryArrayBuffer);
+                this.wetBuffer = await this.audioContext.decodeAudioData(wetArrayBuffer);
+
+                // Create gain nodes
+                this.dryGainNode = this.audioContext.createGain();
+                this.wetGainNode = this.audioContext.createGain();
+
+                // Connect nodes
+                this.dryGainNode.connect(this.audioContext.destination);
+                this.wetGainNode.connect(this.audioContext.destination);
+
+                // Set initial values
+                this.updateMix(1); // Start with 100% dry
+            }
+
+            setupEventListeners() {
+                const playButton = document.getElementById('playButton');
+                const mixSlider = document.getElementById('mixSlider');
+                const mixValue = document.getElementById('mixValue');
+
+                playButton.addEventListener('click', () => this.togglePlay());
+                mixSlider.addEventListener('input', (e) => {
+                    const value = parseFloat(e.target.value);
+                    this.updateMix(value);
+                    mixValue.textContent = value.toFixed(2);
+                });
+            }
+
+            updateMix(x) {
+                // x is the dry mix amount (0 to 1)
+                // wet mix is (1 - x)
+                this.dryGainNode.gain.value = x;
+                this.wetGainNode.gain.value = 1 - x;
+            }
+
+            togglePlay() {
+                if (!this.isPlaying) {
+                    this.startTime = this.audioContext.currentTime;
+                    this.playAudio();
+                    this.isPlaying = true;
+                    document.getElementById('playButton').textContent = 'Stop';
+                } else {
+                    this.stopAudio();
+                    this.isPlaying = false;
+                    document.getElementById('playButton').textContent = 'Play';
+                }
+            }
+
+            playAudio() {
+                const drySource = this.audioContext.createBufferSource();
+                const wetSource = this.audioContext.createBufferSource();
+
+                drySource.buffer = this.dryBuffer;
+                wetSource.buffer = this.wetBuffer;
+
+                drySource.connect(this.dryGainNode);
+                wetSource.connect(this.wetGainNode);
+
+                drySource.start(this.startTime);
+                wetSource.start(this.startTime);
+
+                drySource.onended = () => {
+                    this.isPlaying = false;
+                    document.getElementById('playButton').textContent = 'Play';
+                };
+            }
+
+            stopAudio() {
+                this.audioContext.close();
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                this.dryGainNode = this.audioContext.createGain();
+                this.wetGainNode = this.audioContext.createGain();
+                this.dryGainNode.connect(this.audioContext.destination);
+                this.wetGainNode.connect(this.audioContext.destination);
+
+                // Restore the mix value
+                const currentMix = parseFloat(document.getElementById('mixSlider').value);
+                this.updateMix(currentMix);
+            }
+        }
+
+        // Initialize the mixer when the page loads
+        window.addEventListener('load', () => {
+            new AudioMixer();
+        });
+    </script>
+</body>
+</html>

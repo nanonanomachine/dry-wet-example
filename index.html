@@ -80,10 +80,10 @@
             }
 
             updateMix(x) {
-                // x is the dry mix amount (0 to 1)
-                // wet mix is (1 - x)
-                this.dryGainNode.gain.value = x;
-                this.wetGainNode.gain.value = 1 - x;
+                // x is now the wet mix amount (0 to 1)
+                // dry mix is (1 - x)
+                this.dryGainNode.gain.value = 1 - x;
+                this.wetGainNode.gain.value = x;
             }
 
             togglePlay() {
